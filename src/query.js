@@ -21,7 +21,8 @@ import logger from '~/src/logger'
  * @returns {Promise[Response]}
  */
 export const get = async (baseUrl, queryParams) => {
+  const options = { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.89 Safari/537.36' } }
   const url = `${baseUrl}?${stringify(queryParams)}`
   logger.debug(`GET ${url}`)
-  return GET(url)
+  return GET(url, options)
 }
