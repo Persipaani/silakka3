@@ -5,9 +5,9 @@ import start from '~/src/core'
 describe('echo module', () => {
   let chatId
   let bot
-  beforeEach(() => {
+  beforeEach(async () => {
     chatId = random(100)
-    bot = start()
+    bot = await start()
   })
 
   it('calculates 1+1', async () => {

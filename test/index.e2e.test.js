@@ -15,7 +15,7 @@ describe('e2e', () => {
     server = new TelegramServer({ port: 9001 })
     await server.start()
     client = server.getClient(token, { timeout: 5000 })
-    bot = start({ polling: true, baseApiUrl: server.ApiURL }, token)
+    bot = await start({ polling: true, baseApiUrl: server.ApiURL }, token)
   })
 
   it('magic', async () => {

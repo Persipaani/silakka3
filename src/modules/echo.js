@@ -9,5 +9,5 @@ export default bot => {
     bot.sendMessage(chatId, resp)
   })
 
-  logger.info(`Echo module added`)
+  logger.info('Echo module added')
 }

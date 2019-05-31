@@ -22,7 +22,7 @@ import modules from '~/src/modules'
  *
  * @returns {Bot}
  */
-export default (config = { polling: true }, token = API_TOKEN) => {
+export default async (config = { polling: true }, token = API_TOKEN) => {
   const bot = new TelegramBot(token, config)
 
   bot.on('polling_error', error => {
@@ -31,7 +31,7 @@ export default (config = { polling: true }, token = API_TOKEN) => {
 
   logger.info(`Bot started`)
 
-  modules(bot) // init submodules
+  await modules(bot) // init submodules
 
   return bot
 }

@@ -7,9 +7,9 @@ import start from '~/src/core'
 describe('magic module', () => {
   let chatId
   let bot
-  beforeEach(() => {
+  beforeEach(async () => {
     chatId = random(100)
-    bot = start()
+    bot = await start()
   })
 
   it("finds Man-o'-War", async () => {
