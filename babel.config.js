@@ -12,6 +12,7 @@ module.exports = function (api) {
     '@babel/proposal-object-rest-spread',
     '@babel/proposal-optional-chaining',
     '@babel/proposal-class-properties',
+    'dynamic-import-node',
     'babel-plugin-root-import'
   ]
 
