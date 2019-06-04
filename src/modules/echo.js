@@ -2,12 +2,10 @@ import logger from '~/src/logger'
 
 export default bot => {
   bot.onText(/\/echo (.+)/, (msg, match) => {
-    const chatId = msg.chat.id
-    const resp = match[1]
+    const { chat } = msg
+    const [, resp] = match
 
     logger.debug(`Echo message received: "${resp}"`)
-    bot.sendMessage(chatId, resp)
+    bot.sendMessage(chat.id, resp)
   })
-
-  logger.info('Echo module added')
 }

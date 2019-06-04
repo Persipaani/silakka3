@@ -31,8 +31,6 @@ export default bot => {
       bot.sendMessage(chatId, 'Sorry, error...')
     }
   })
-
-  logger.info(`Tube module added`)
 }
 
 const getRaw = async videoQuery => {

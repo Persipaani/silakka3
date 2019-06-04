@@ -71,5 +71,4 @@ export default bot => {
     logger.debug(`8Ball message received ${resp}`)
     bot.sendMessage(chat.id, getAnswer())
   })
-  logger.info('8Ball module added')
 }

@@ -178,8 +178,6 @@ const handleError = err => {
 export default bot => {
   onCommand(bot)
   onCallback(bot)
-
-  logger.info(`Magic module added`)
 }
 
 export { MODULE_ID }
