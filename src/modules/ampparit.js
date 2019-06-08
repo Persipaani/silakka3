@@ -4,11 +4,13 @@ import { parse } from 'node-html-parser'
 
 var cache = null // this is the cache
 var timeStamp = new Date()
+const maxResults = 5 // amount
+const maxCache = 5 // minutes
 
 /**
  *
  * Module for searching Ampparit for funny news
- * Takes an optional parameter (numer 1-10) for amount of articles to return
+ * Takes an optional parameter (numer 1-5) for amount of articles to return
  * If no parameter is supplied 1 funny news is returned
  * Caches data so that html query is done only every 5 minutes
  *
@@ -25,48 +27,70 @@ var timeStamp = new Date()
  */
 
 export default bot => {
-  bot.onText(/\/funnynews (.+)/, async (msg, match) => {
+  bot.onText(/\/funnynews(\s.+)?/, async (msg, match) => {
     const chatId = msg.chat.id
+    const amount = validateInput(match)
 
-    logger.debug(match[1])
+    try {
+      // Check if cache available or has expired
+      var now = new Date()
+      if (now.getTime() - timeStamp.getTime() >= maxCache * 60 * 1000 || cache == null) { // min * s * ms
+        logger.debug('Prev data: ' + timeStamp.getHours() + ':' + timeStamp.getMinutes() + ' -> Fetching new data!')
+        cache = await queryNews()
+        timeStamp = new Date()
+      } else {
+        logger.debug('Prev data: ' + timeStamp.getHours() + ':' + timeStamp.getMinutes() + ' -> Using cached data!')
+      }
 
-    if (match.length <= 2) {
-      try {
-        var now = new Date()
-        if (now.getTime() - timeStamp.getTime() >= 300000 || cache == null) {
-          logger.debug('Fetching data: ' + (now.getTime() - timeStamp.getTime()))
-          cache = await queryNews()
-          timeStamp = new Date()
+      // Create funny headings from the available data
+      var funnies = ''
+      var beginning = 'No'
+      var end = 'Data'
+
+      for (var i = 0; i < amount; i++) {
+        beginning = cache[0][Math.floor(Math.random() * cache[0].length)]
+        end = cache[1][Math.floor(Math.random() * cache[1].length)]
+        if (amount === i + 1) {
+          funnies += beginning + ' \u2013 ' + end + '\n'
         } else {
-          logger.debug('Using old cached data: ' + (now.getTime() - timeStamp.getTime()))
-        }
-
-        var funnies = ''
-        var beginning = 'No'
-        var end = 'Data'
-        for (var i = 0; i < parseInt(match[1], 10); i++) {
-          beginning = cache[0][Math.floor(Math.random() * cache[0].length)]
-          end = cache[1][Math.floor(Math.random() * cache[1].length)]
           funnies += beginning + ' \u2013 ' + end + '\n' + '~~~~~~~~~~~~~~~~~' + '\n'
         }
-
-        if (funnies !== '') {
-          bot.sendMessage(chatId, funnies)
-        } else {
-          bot.sendMessage(chatId, 'ERROR! No data to send...')
-        }
-      } catch (error) {
-        logger.error(error)
-        bot.sendMessage(chatId, 'Sorry, error...')
       }
-    } else {
-      bot.sendMessage(chatId, 'Invalid entry, RTFM...')
+
+      if (funnies !== '') {
+        bot.sendMessage(chatId, funnies)
+      } else {
+        bot.sendMessage(chatId, 'ERROR! No data to send...')
+      }
+    } catch (error) {
+      logger.error(error)
+      bot.sendMessage(chatId, 'Sorry, there was an error...')
     }
   })
-
-  logger.info(`ampparit module added`)
+  logger.info(`Ampparit module added`)
 }
 
+/*
+  Validate & parse input.
+  input = a match list provided by the bot wrapper.
+*/
+const validateInput = input => {
+  if (input[1] !== undefined) {
+    const matchThis = '^[1-' + maxResults + ']+$'
+    const regex = new RegExp(matchThis, 'g')
+    if (input[1].trim().match(regex)) {
+      return parseInt(input[1].trim().charAt(0), 10)
+    } else {
+      logger.debug('Unsuitable parameter')
+      return 1
+    }
+  } else {
+    logger.debug('No parameter given')
+    return 1
+  }
+}
+
+/* Data GET */
 const getRaw = async videoQuery => {
   try {
     return await get('https://www.ampparit.com/suosituimmat')
@@ -75,14 +99,15 @@ const getRaw = async videoQuery => {
   }
 }
 
+/* Queries data and parses it */
 const queryNews = async newsQuery => {
-  var results = '<html> <p>Hello</p></html>'
-  results = await getRaw()
+  const results = await getRaw()
   const parsed = await parse(results.data)
   const titleLinkList = parsed.firstChild.querySelectorAll('a.news-item-headline')
   return headlines(titleLinkList)
 }
 
+/* Converts parsed data to two lists: beginnings and ends */
 const headlines = rawData => {
   var beginnings = []
   var ends = []
