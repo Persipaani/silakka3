@@ -1,6 +1,7 @@
 import logger from '~/src/logger'
 import { get } from '~/src/query'
 import { parse } from 'node-html-parser'
+import { sample } from 'lodash'
 
 var cache = null // this is the cache
 var timeStamp = new Date()
@@ -29,15 +30,15 @@ const maxCache = 5 // minutes
 export default bot => {
   bot.onText(/\/funnynews(\s.+)?/, async (msg, match) => {
     const chatId = msg.chat.id
-    const amount = validateInput(match)
 
     try {
+      const amount = validateInput(match[1])
       // Check if cache available or has expired
       var now = new Date()
       if (now.getTime() - timeStamp.getTime() >= maxCache * 60 * 1000 || cache == null) { // min * s * ms
         logger.debug('Prev data: ' + timeStamp.getHours() + ':' + timeStamp.getMinutes() + ' -> Fetching new data!')
-        cache = await queryNews()
         timeStamp = new Date()
+        cache = await queryNews()
       } else {
         logger.debug('Prev data: ' + timeStamp.getHours() + ':' + timeStamp.getMinutes() + ' -> Using cached data!')
       }
@@ -48,8 +49,8 @@ export default bot => {
       var end = 'Data'
 
       for (var i = 0; i < amount; i++) {
-        beginning = cache[0][Math.floor(Math.random() * cache[0].length)]
-        end = cache[1][Math.floor(Math.random() * cache[1].length)]
+        beginning = sample(cache[0])
+        end = sample(cache[1])
         if (amount === i + 1) {
           funnies += beginning + ' \u2013 ' + end + '\n'
         } else {
@@ -75,11 +76,11 @@ export default bot => {
   input = a match list provided by the bot wrapper.
 */
 const validateInput = input => {
-  if (input[1] !== undefined) {
+  if (input !== undefined) {
     const matchThis = '^[1-' + maxResults + ']+$'
     const regex = new RegExp(matchThis, 'g')
-    if (input[1].trim().match(regex)) {
-      return parseInt(input[1].trim().charAt(0), 10)
+    if (input.trim().match(regex)) {
+      return parseInt(input.trim().charAt(0), 10)
     } else {
       logger.debug('Unsuitable parameter')
       return 1
@@ -92,11 +93,7 @@ const validateInput = input => {
 
 /* Data GET */
 const getRaw = async videoQuery => {
-  try {
-    return await get('https://www.ampparit.com/suosituimmat')
-  } catch (error) {
-    logger.error(error)
-  }
+  return get('https://www.ampparit.com/suosituimmat')
 }
 
 /* Queries data and parses it */
