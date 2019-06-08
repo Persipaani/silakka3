@@ -40,7 +40,7 @@ npm run start:watch
 
 ### Adding a new module
 
-1. Create new JS file 'myModule.js' under src/modules
+1. Create new JS file 'myModule.js' under src/modules, it will be automatically loaded upon startup
 
 ```javascript
 import logger from "~/src/logger";
@@ -58,19 +58,9 @@ export default bot => {
 };
 ```
 
-2. Import and add the module in module list of src/modules/index.js
+2. Restart the bot if not running in watch mode (start:watch will automatically reload upon save)
 
-```javascript
-import echo from "~/src/modules/echo";
-import myModule from "~/src/modules/myModule";
-
-// add module initializers here
-const modules = [echo, myModule];
-```
-
-3. Restart the bot if not running in watch mode (start:watch will automatically reload upon save)
-
-4. Test the module!
+3. Test the module!
 
 ```
 /myCommand My new amazing module!
