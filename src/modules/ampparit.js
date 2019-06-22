@@ -91,9 +91,9 @@ const validateInput = input => {
 }
 
 /* Data GET */
-const getRaw = async videoQuery => {
+const getRaw = async urlAddress => {
   try {
-    return await get('https://www.ampparit.com/suosituimmat')
+    return await get(urlAddress)
   } catch (error) {
     logger.error(error)
   }
@@ -101,7 +101,7 @@ const getRaw = async videoQuery => {
 
 /* Queries data and parses it */
 const queryNews = async newsQuery => {
-  const results = await getRaw()
+  const results = await getRaw('https://www.ampparit.com/suosituimmat')
   const parsed = await parse(results.data)
   const titleLinkList = parsed.firstChild.querySelectorAll('a.news-item-headline')
   return headlines(titleLinkList)
