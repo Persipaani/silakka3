@@ -100,7 +100,7 @@ const getRaw = async urlAddress => {
 }
 
 /* Queries data and parses it */
-const queryNews = async newsQuery => {
+const queryNews = async () => {
   const results = await getRaw('https://www.ampparit.com/suosituimmat')
   const parsed = await parse(results.data)
   const titleLinkList = parsed.firstChild.querySelectorAll('a.news-item-headline')

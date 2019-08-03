@@ -78,37 +78,21 @@ const modules = [echo, myModule];
 
 ## Planning
 
-### Main focus
 
-- Update frameworks
-- Switch from Python -> Node.js? (https://github.com/yagop/node-telegram-bot-api)
-- Enable better spam control
-- Remove unused bundles
-- Recreate old bundles with Node.js
-- Move to a new server
-
-### New features
-
-- 8-ball functionality
-- News headlines & weather
-- Poor jokes from Koululaisen vitsikirja or similar
-- Bing search
-
-### Improvements
+### TODO
 
 - Wikipedia module
 - Google module (add more lines to results, better searches)
-
-### Remove
-
-- Rating system commands from TG
-- Not working oracle system
+- 8-ball functionality
+- Poor jokes from Koululaisen vitsikirja or similar
+- Bing search
+- Enable better spam control
 
 ### RoadMap
 
-7/2019: Eka versio
+8/2019: Jotain palvelimelle
 
-### Proposed Technologies
+### Used Technologies
 
 https://github.com/yagop/node-telegram-bot-api
 https://github.com/baconjs/bacon.js/

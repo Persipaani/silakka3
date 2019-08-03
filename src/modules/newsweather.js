@@ -7,8 +7,9 @@ var newsCache = null // this is the cache for news data
 var weatherCache = null // this is the cache for weather data
 var newsTimeStamp = new Date()
 var weatherTimeStamp = new Date()
-const maxNewsCache = 15
-const maxWeatherCache = 60
+const maxNewsCache = 15 // Max time to cache the data for (minutes)
+const maxWeatherCache = 60 // Max time to cache the data for (minutes)
+const disableDescriptions = true // Disable descriptions from news to save space. Enable to get more detailed results.
 
 /**
  *
@@ -30,17 +31,23 @@ const maxWeatherCache = 60
 export default bot => {
   bot.onText(/\/today(\s.+)?/, async (msg, match) => {
     const chatId = msg.chat.id
-
-    // Fetch news first
     try {
-      // Check if cache available or has expired
-      var now = new Date()
-      if (now.getTime() - newsTimeStamp.getTime() >= maxNewsCache * 60 * 1000 || newsCache == null) { // min * s * ms
+      // *** Fetch news first ***
+      if (cacheExists(newsTimeStamp, newsCache, maxNewsCache)) {
         logger.debug('Prev data: ' + newsTimeStamp.getHours() + ':' + newsTimeStamp.getMinutes() + ' -> Fetching new data!')
         newsCache = await queryNews()
         newsTimeStamp = new Date()
       } else {
         logger.debug('Prev data: ' + newsTimeStamp.getHours() + ':' + newsTimeStamp.getMinutes() + ' -> Using cached data!')
+      }
+
+      // *** Then fetch the weather info ***
+      if (cacheExists(weatherTimeStamp, weatherCache, maxWeatherCache)) {
+        logger.debug('Prev data: ' + weatherTimeStamp.getHours() + ':' + weatherTimeStamp.getMinutes() + ' -> Fetching new data!')
+        weatherCache = await queryWeather()
+        weatherTimeStamp = new Date()
+      } else {
+        logger.debug('Prev data: ' + weatherTimeStamp.getHours() + ':' + weatherTimeStamp.getMinutes() + ' -> Using cached data!')
       }
 
       // Form a response message from available data
@@ -52,14 +59,16 @@ export default bot => {
         var titleText = newsCache[0][i]
         var descText = newsCache[1][i]
         var linkText = newsCache[2][i]
-
-        newsItem = titleText + '\n===>' + descText + '\n' + '(' + linkText + ')'
-        if (newsCache[0].length === i + 1) {
-          responseMessage += newsItem
+        if (disableDescriptions) {
+          newsItem = titleText + '\n' + '(' + linkText + ')'
         } else {
-          responseMessage += newsItem + '\n==========================\n'
+          newsItem = titleText + '\n===>' + descText + '\n' + '(' + linkText + ')'
         }
+
+        responseMessage += newsItem + '\n==========================\n'
       }
+
+      responseMessage += weatherCache
 
       if (responseMessage !== '') {
         bot.sendMessage(chatId, responseMessage)
@@ -74,18 +83,19 @@ export default bot => {
   logger.info(`News & Weather module added`)
 }
 
-
-/* Data GET */
-const getRaw = async urlAddress => {
-  try {
-    return await get(urlAddress)
-  } catch (error) {
-    logger.error(error)
+/* Check cache */
+const cacheExists = (timestamp, cache, max) => {
+  /* Make sure to pass correct values as arguments! */
+  var currentTime = new Date().getTime()
+  if (currentTime - timestamp.getTime() >= max * 60 * 1000 || cache == null) { // min * s * ms
+    return true
+  } else {
+    return false
   }
 }
 
 /* Queries data and parses it */
-const queryNews = async newsQuery => {
+const queryNews = async () => {
   const parser = new Parser({
     headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36' },
     customFields: {
@@ -112,4 +122,25 @@ const queryNews = async newsQuery => {
   */
 
   return [titles, descriptions, links]
+}
+
+/* Data GET */
+const getRaw = async urlAddress => {
+  try {
+    return await get(urlAddress)
+  } catch (error) {
+    logger.error(error)
+  }
+}
+
+const queryWeather = async () => {
+  const results = await getRaw('https://www.foreca.fi/')
+  const parsed = await parse(results.data)
+  const weatherData = parsed.firstChild.querySelector('div.textfc')
+  return weatherString(weatherData)
+}
+
+const weatherString = rawData => {
+  const withHeadings = rawData.structuredText.substr(0, rawData.structuredText.indexOf('Lue lisää…')).split('\n')
+  return withHeadings[withHeadings.length - 2]
 }
