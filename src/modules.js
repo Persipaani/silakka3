@@ -1,5 +1,6 @@
+import logger from '~/src/logger'
 import { readdirSync } from 'fs'
-import { join } from 'path'
+import { join, basename } from 'path'
 
 /**
  * Finds all module files under 'modules' directory
@@ -14,8 +15,15 @@ export default async bot => {
   const moduleFiles = readdirSync(join(__dirname, 'modules'))
   await Promise.all(
     moduleFiles.map(async file => {
-      const module = await import(`./modules/${file}`)
-      module.default(bot)
+      const moduleName = basename(file, '.js')
+      try {
+        const mod = await import(`./modules/${moduleName}`)
+        mod.default(bot)
+
+        logger.info(`${moduleName} module loaded`)
+      } catch (error) {
+        logger.error(`${moduleName} module loading failed: ${error}`)
+      }
     })
   )
 }

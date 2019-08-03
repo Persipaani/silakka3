@@ -51,6 +51,4 @@ const onCommand = bot =>
  */
 export default bot => {
   onCommand(bot)
-
-  logger.info(`Calc module added`)
 }
