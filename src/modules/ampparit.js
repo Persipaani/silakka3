@@ -92,13 +92,17 @@ const validateInput = input => {
 }
 
 /* Data GET */
-const getRaw = async videoQuery => {
-  return get('https://www.ampparit.com/suosituimmat')
+const getRaw = async urlAddress => {
+  try {
+    return await get(urlAddress)
+  } catch (error) {
+    logger.error(error)
+  }
 }
 
 /* Queries data and parses it */
-const queryNews = async newsQuery => {
-  const results = await getRaw()
+const queryNews = async () => {
+  const results = await getRaw('https://www.ampparit.com/suosituimmat')
   const parsed = await parse(results.data)
   const titleLinkList = parsed.firstChild.querySelectorAll('a.news-item-headline')
   return headlines(titleLinkList)
