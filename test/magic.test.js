@@ -24,7 +24,7 @@ describe('magic module', () => {
   it('finds Murder', async () => {
     await bot.emit(
       'message',
-      createMessage('/magic Murder color:b mana:{1}{B}{B}', chatId)
+      createMessage('/magic Murder color:b mana:{1}{B}{B} set:m20', chatId)
     )
 
     expect(bot.sendMessage).toHaveBeenCalledTimes(1)

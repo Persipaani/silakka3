@@ -36,7 +36,7 @@ const onCommand = bot =>
     try {
       const [, expr] = match
       logger.debug(`Calc expression received: "${expr}"`)
-      return bot.sendMessage(chat.id, evaluate(expr))
+      return bot.sendMessage(chat.id, `${evaluate(expr)}`)
     } catch (err) {
       bot.sendMessage(chat.id, "You crazy! I can't do that!")
     }
