@@ -114,6 +114,9 @@ const headlines = rawData => {
   var ends = []
   var parts = []
   for (var i = 0; i < rawData.length; i++) {
+    if (rawData[i].innerHTML.toLowerCase().includes('korona')) {
+      continue
+    }
     if (rawData[i].innerHTML.includes(' - ')) {
       parts = rawData[i].innerHTML.split(' - ')
       beginnings.push(parts[0])
